@@ -16,7 +16,14 @@ import java.util.Map;
 public interface FinancialRecordRepository extends JpaRepository<FinancialRecord, Long> {
 
     // Pagination & Search support
-    @Query("SELECT f FROM FinancialRecord f WHERE " +
+    @Query(value = "SELECT f FROM FinancialRecord f WHERE " +
+            "(:userId IS NULL OR f.user.id = :userId) AND " +
+            "(:type IS NULL OR f.type = :type) AND " +
+            "(:category IS NULL OR LOWER(f.category) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
+            "(:notes IS NULL OR LOWER(f.notes) LIKE LOWER(CONCAT('%', :notes, '%'))) AND " +
+            "(:startDate IS NULL OR f.date >= :startDate) AND " +
+            "(:endDate IS NULL OR f.date <= :endDate)",
+            countQuery = "SELECT COUNT(f) FROM FinancialRecord f WHERE " +
             "(:userId IS NULL OR f.user.id = :userId) AND " +
             "(:type IS NULL OR f.type = :type) AND " +
             "(:category IS NULL OR LOWER(f.category) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
@@ -33,12 +40,18 @@ public interface FinancialRecordRepository extends JpaRepository<FinancialRecord
             Pageable pageable);
 
     // Summary Analytics
-    @Query("SELECT SUM(f.amount) FROM FinancialRecord f WHERE f.user.id = :userId AND f.type = 'INCOME'")
+    @Query("SELECT SUM(f.amount) FROM FinancialRecord f WHERE (:userId IS NULL OR f.user.id = :userId) AND f.type = com.finance.finance_manager.entity.TransactionType.INCOME")
     BigDecimal sumIncomeByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT SUM(f.amount) FROM FinancialRecord f WHERE f.user.id = :userId AND f.type = 'EXPENSE'")
+    @Query("SELECT SUM(f.amount) FROM FinancialRecord f WHERE (:userId IS NULL OR f.user.id = :userId) AND f.type = com.finance.finance_manager.entity.TransactionType.EXPENSE")
     BigDecimal sumExpenseByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT f.category as category, SUM(f.amount) as total FROM FinancialRecord f WHERE f.user.id = :userId GROUP BY f.category")
+    @Query("SELECT SUM(f.amount) FROM FinancialRecord f WHERE f.user.id = :userId AND f.type = com.finance.finance_manager.entity.TransactionType.INCOME AND f.date >= :startDate AND f.date <= :endDate")
+    BigDecimal sumIncomeByUserIdInDateRange(@Param("userId") Long userId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT SUM(f.amount) FROM FinancialRecord f WHERE f.user.id = :userId AND f.type = com.finance.finance_manager.entity.TransactionType.EXPENSE AND f.date >= :startDate AND f.date <= :endDate")
+    BigDecimal sumExpenseByUserIdInDateRange(@Param("userId") Long userId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT f.category as category, SUM(f.amount) as total FROM FinancialRecord f WHERE (:userId IS NULL OR f.user.id = :userId) GROUP BY f.category")
     List<Map<String, Object>> sumByCategoryByUserId(@Param("userId") Long userId);
 }

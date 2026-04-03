@@ -1,11 +1,13 @@
 package com.finance.finance_manager.service;
 
 import com.finance.finance_manager.dto.FinancialRecordDTO;
+import com.finance.finance_manager.dto.UserFinancialSummaryDTO;
 import com.finance.finance_manager.entity.FinancialRecord;
 import com.finance.finance_manager.entity.Role;
 import com.finance.finance_manager.entity.TransactionType;
 import com.finance.finance_manager.entity.User;
 import com.finance.finance_manager.repository.FinancialRecordRepository;
+import com.finance.finance_manager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,19 +17,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FinancialRecordService {
 
     private final FinancialRecordRepository financialRecordRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public FinancialRecord createRecord(FinancialRecordDTO dto, User user) {
-        if (user.getRole() == Role.VIEWER || user.getRole() == Role.ANALYST) {
-            throw new AccessDeniedException("Your role does not allow creating records.");
+        if (user.getRole() == Role.ANALYST) {
+            throw new AccessDeniedException("Analyst role is read-only and cannot create records.");
         }
 
         FinancialRecord record = FinancialRecord.builder()
@@ -128,5 +133,41 @@ public class FinancialRecordService {
              userId = null;
         }
         return financialRecordRepository.sumByCategoryByUserId(userId);
+    }
+
+    public List<UserFinancialSummaryDTO> getUserFinancialSummaries(Role filterRole) {
+        List<User> users = userRepository.findAll();
+        
+        if (filterRole != null) {
+            users = users.stream().filter(u -> u.getRole() == filterRole).collect(Collectors.toList());
+        }
+
+        LocalDate now = LocalDate.now();
+        LocalDate startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
+
+        return users.stream().map(u -> {
+            BigDecimal totalIncome = financialRecordRepository.sumIncomeByUserId(u.getId());
+            BigDecimal totalExpense = financialRecordRepository.sumExpenseByUserId(u.getId());
+            BigDecimal monthlyIncome = financialRecordRepository.sumIncomeByUserIdInDateRange(u.getId(), startOfMonth, endOfMonth);
+            BigDecimal monthlyExpense = financialRecordRepository.sumExpenseByUserIdInDateRange(u.getId(), startOfMonth, endOfMonth);
+            List<Map<String, Object>> categories = financialRecordRepository.sumByCategoryByUserId(u.getId());
+
+            totalIncome = totalIncome != null ? totalIncome : BigDecimal.ZERO;
+            totalExpense = totalExpense != null ? totalExpense : BigDecimal.ZERO;
+            monthlyIncome = monthlyIncome != null ? monthlyIncome : BigDecimal.ZERO;
+            monthlyExpense = monthlyExpense != null ? monthlyExpense : BigDecimal.ZERO;
+
+            return UserFinancialSummaryDTO.builder()
+                    .username(u.getUsername())
+                    .role(u.getRole())
+                    .totalIncome(totalIncome)
+                    .totalExpenses(totalExpense)
+                    .netBalance(totalIncome.subtract(totalExpense))
+                    .monthlyIncome(monthlyIncome)
+                    .monthlyExpenses(monthlyExpense)
+                    .categorySummary(categories)
+                    .build();
+        }).collect(Collectors.toList());
     }
 }

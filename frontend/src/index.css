@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0070f3;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  * {
+    @apply border-black/10;
+  }
+}
+
+@layer components {
+  .card-shadow {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  .glass-header {
+    @apply sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b;
+  }
+  
+  .input-field {
+    @apply w-full border border-black/10 p-3 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-sm;
+  }
+  
+  .btn-outline {
+    @apply border border-black/10 font-semibold py-2 px-4 rounded-lg hover:bg-gray-50 active:scale-95 transition-all;
+  }
+}

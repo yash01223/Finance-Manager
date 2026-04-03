@@ -1,7 +1,9 @@
 package com.finance.finance_manager.controller;
 
 import com.finance.finance_manager.dto.FinancialRecordDTO;
+import com.finance.finance_manager.dto.UserFinancialSummaryDTO;
 import com.finance.finance_manager.entity.FinancialRecord;
+import com.finance.finance_manager.entity.Role;
 import com.finance.finance_manager.entity.TransactionType;
 import com.finance.finance_manager.entity.User;
 import com.finance.finance_manager.service.FinancialRecordService;
@@ -63,5 +65,15 @@ public class FinancialRecordController {
             @AuthenticationPrincipal User user) {
         financialRecordService.deleteRecord(id, user);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/user-summaries")
+    public ResponseEntity<List<UserFinancialSummaryDTO>> getUserSummaries(
+            @AuthenticationPrincipal User user,
+            @RequestParam(required = false) Role role) {
+        if (user.getRole() != Role.ADMIN && user.getRole() != Role.ANALYST) {
+            throw new AccessDeniedException("Access denied.");
+        }
+        return ResponseEntity.ok(financialRecordService.getUserFinancialSummaries(role));
     }
 }
