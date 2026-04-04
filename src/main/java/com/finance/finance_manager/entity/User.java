@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "users")
@@ -16,6 +18,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 public class User implements UserDetails {
 
     @Id
@@ -33,9 +37,14 @@ public class User implements UserDetails {
     private Role role;
 
     @Builder.Default
+    @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean active = true;
 
     private LocalDateTime lastSeen;
+
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean deleted = false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

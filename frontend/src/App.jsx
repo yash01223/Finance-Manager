@@ -20,20 +20,20 @@ function App() {
       <Routes>
         <Route path="/login" element={!token ? <Login setToken={setToken} /> : <Navigate to="/dashboard" />} />
         <Route path="/register" element={<Register />} />
-        
-        <Route 
-          path="/dashboard" 
-          element={token ? <Dashboard /> : <Navigate to="/login" />} 
+
+        <Route
+          path="/dashboard"
+          element={token ? <Dashboard /> : <Navigate to="/login" />}
         />
-        <Route 
-          path="/records" 
-          element={token ? <Records /> : <Navigate to="/login" />} 
+        <Route
+          path="/records"
+          element={token ? <Records /> : <Navigate to="/login" />}
         />
-        <Route 
-          path="/users" 
-          element={token && role === 'ADMIN' ? <Users /> : <Navigate to={token ? "/dashboard" : "/login"} />} 
+        <Route
+          path="/users"
+          element={token && role === 'ADMIN' ? <Users /> : <Navigate to={token ? "/dashboard" : "/login"} />}
         />
-        
+
         <Route path="*" element={<Navigate to={token ? "/dashboard" : "/login"} />} />
       </Routes>
     </Router>

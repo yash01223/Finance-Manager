@@ -1,44 +1,58 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../../utils/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { TrendingUp, TrendingDown, Wallet, LogOut, FileText, LayoutDashboard, User, Calendar, Shield } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { TrendingUp, TrendingDown, Wallet, LogOut, FileText, LayoutDashboard, User, Shield, RefreshCw } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const Dashboard = () => {
     const [summary, setSummary] = useState({ totalIncome: 0, totalExpenses: 0, netBalance: 0, currency: 'INR' });
     const [categoryData, setCategoryData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
+    
     const role = localStorage.getItem('role');
     const username = localStorage.getItem('username');
+    
+    const targetUserId = searchParams.get('userId');
+    const targetUsername = searchParams.get('targetUsername');
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const params = {
+                userId: targetUserId || undefined
+            };
+            const [summaryRes, categoryRes] = await Promise.all([
+                api.get('/dashboard/summary', { params }),
+                api.get('/dashboard/categories', { params })
+            ]);
+            setSummary(summaryRes.data);
+            setCategoryData(categoryRes.data);
+        } catch (err) {
+            console.error('Error fetching dashboard data', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [targetUserId]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [summaryRes, categoryRes] = await Promise.all([
-                    api.get('/dashboard/summary'),
-                    api.get('/dashboard/categories')
-                ]);
-                setSummary(summaryRes.data);
-                setCategoryData(categoryRes.data);
-            } catch (err) {
-                console.error('Error fetching dashboard data', err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     const handleLogout = () => {
         localStorage.clear();
         navigate('/login');
     };
 
+    const handleClearFilter = () => {
+        setSearchParams({});
+    };
+
     const containerVariants = {
         hidden: { opacity: 0 },
-        visible: {
+        visible: { 
             opacity: 1,
             transition: { staggerChildren: 0.1 }
         }
@@ -54,7 +68,7 @@ const Dashboard = () => {
             {/* Sidebar */}
             <aside className="w-72 bg-white border-r border-gray-100 flex flex-col sticky top-0 h-screen">
                 <div className="p-8 pb-12">
-                    <div className="flex items-center space-x-3 group cursor-pointer">
+                    <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => navigate('/dashboard')}>
                         <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white transition-transform group-hover:scale-110 shadow-lg shadow-black/10">
                             <Wallet size={20} />
                         </div>
@@ -65,18 +79,20 @@ const Dashboard = () => {
                 <nav className="flex-1 px-4 space-y-1">
                     <button 
                         onClick={() => navigate('/dashboard')}
-                        className="flex items-center space-x-3 w-full px-4 py-3 bg-blue-50/50 text-blue-600 rounded-xl font-bold transition-all border border-blue-100/50"
+                        className={`flex items-center space-x-3 w-full px-4 py-3 rounded-xl font-bold transition-all border ${!targetUserId ? 'bg-blue-50/50 text-blue-600 border-blue-100/50' : 'text-gray-400 hover:text-black hover:bg-gray-50 border-transparent'}`}
                     >
                         <LayoutDashboard size={20} />
                         <span className="text-sm">Dashboard</span>
                     </button>
-                    <button 
-                        onClick={() => navigate('/records')}
-                        className="flex items-center space-x-3 w-full px-4 py-3 text-gray-400 hover:text-black hover:bg-gray-50 rounded-xl font-bold transition-all border border-transparent"
-                    >
-                        <FileText size={20} />
-                        <span className="text-sm">Records</span>
-                    </button>
+                    {role !== 'VIEWER' && (
+                        <button 
+                            onClick={() => navigate('/records')}
+                            className="flex items-center space-x-3 w-full px-4 py-3 text-gray-400 hover:text-black hover:bg-gray-50 rounded-xl font-bold transition-all border border-transparent"
+                        >
+                            <FileText size={20} />
+                            <span className="text-sm">Records</span>
+                        </button>
+                    )}
                     {role === 'ADMIN' && (
                         <button 
                             onClick={() => navigate('/users')}
@@ -113,15 +129,23 @@ const Dashboard = () => {
                 {/* Header */}
                 <header className="glass-header px-12 py-6 flex justify-between items-center bg-white/70">
                     <div>
-                        <h1 className="text-3xl font-black tracking-tight text-black">Financial Overview</h1>
-                        <p className="text-sm text-gray-400 font-medium mt-0.5">Track your spending and income trends</p>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <div className="flex flex-col items-end">
-                            <div className="flex items-center space-x-2 text-gray-400">
-                                <Calendar size={14} />
-                                <span className="text-xs font-bold uppercase tracking-widest">{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                            </div>
+                        <div className="flex items-center space-x-3 mb-1">
+                            <h1 className="text-3xl font-black tracking-tight text-black uppercase">
+                                {targetUserId ? "User Analytics" : "Financial Overview"}
+                            </h1>
+                            {targetUserId && (
+                                <button 
+                                    onClick={handleClearFilter}
+                                    className="px-3 py-1 bg-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-500 rounded-lg hover:bg-black hover:text-white transition-all flex items-center space-x-2"
+                                >
+                                    <RefreshCw size={10} /> <span>Reset Filter</span>
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex items-center space-x-6">
+                            <p className="text-sm text-gray-400 font-medium">
+                                {targetUserId ? `Viewing analytics for ${targetUsername}` : "Aggregated system statistics"}
+                            </p>
                         </div>
                     </div>
                 </header>
@@ -164,13 +188,15 @@ const Dashboard = () => {
                         <div className="flex justify-between items-center mb-10">
                             <div>
                                 <h3 className="text-xl font-black text-black tracking-tight uppercase">Spending Analytics</h3>
-                                <p className="text-sm text-gray-400 font-medium">Monthly category-wise breakdown</p>
+                                <p className="text-sm text-gray-400 font-medium">
+                                    {targetUserId ? `Specific categories for ${targetUsername}` : "Monthly category-wise breakdown"}
+                                </p>
                             </div>
                         </div>
 
                         <div className="h-[400px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={categoryData} barCategoryGap={15}>
+                                <BarChart data={categoryData} barCategoryGap={40}>
                                     <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f0f0f0" />
                                     <XAxis 
                                         dataKey="category" 
@@ -195,7 +221,7 @@ const Dashboard = () => {
                                         }}
                                         itemStyle={{ color: '#000', fontWeight: '800' }}
                                     />
-                                    <Bar dataKey="total" radius={[12, 12, 0, 0]} barSize={65}>
+                                    <Bar dataKey="total" radius={[8, 8, 0, 0]} barSize={32}>
                                         {categoryData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#2563eb' : '#3b82f6'} />
                                         ))}

@@ -15,6 +15,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class UserFinancialSummaryDTO {
+    private Long userId;
     private String username;
     private Role role;
     private BigDecimal totalIncome;

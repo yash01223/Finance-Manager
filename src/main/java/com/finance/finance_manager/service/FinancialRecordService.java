@@ -16,8 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,16 +28,20 @@ public class FinancialRecordService {
     private final FinancialRecordRepository financialRecordRepository;
     private final UserRepository userRepository;
 
+    private static final List<String> FIXED_CATEGORIES = Arrays.asList("Salary", "Rent", "Travel", "Food", "other");
+
     @Transactional
     public FinancialRecord createRecord(FinancialRecordDTO dto, User user) {
-        if (user.getRole() == Role.ANALYST) {
-            throw new AccessDeniedException("Analyst role is read-only and cannot create records.");
+        if (user.getRole() == Role.VIEWER) {
+            throw new AccessDeniedException("Viewer role is read-only and cannot create records.");
         }
+
+        String normalizedCategory = normalizeCategory(dto.getCategory());
 
         FinancialRecord record = FinancialRecord.builder()
                 .amount(dto.getAmount())
                 .type(dto.getType())
-                .category(dto.getCategory())
+                .category(normalizedCategory)
                 .date(dto.getDate())
                 .notes(dto.getNotes())
                 .user(user)
@@ -47,32 +50,44 @@ public class FinancialRecordService {
         return financialRecordRepository.save(record);
     }
 
+    private String normalizeCategory(String category) {
+        if (category == null) return "other";
+        String trimmed = category.trim();
+        for (String fixed : FIXED_CATEGORIES) {
+            if (fixed.equalsIgnoreCase(trimmed)) {
+                return fixed;
+            }
+        }
+        return "other";
+    }
+
     public Page<FinancialRecord> getAllRecords(
-            User user, TransactionType type, String category, String notes,
-            LocalDate startDate, LocalDate endDate, Pageable pageable) {
+            User user, Long targetUserId, TransactionType type, String category, String notes,
+            Pageable pageable) {
+
+        if (user.getRole() == Role.VIEWER) {
+            throw new AccessDeniedException("Viewers can only access dashboard analytics.");
+        }
 
         Long userId = user.getId();
 
-        // If ANALYST or ADMIN, they can optionally see all records
         if (user.getRole() == Role.ANALYST || user.getRole() == Role.ADMIN) {
-            userId = null; // Setting to null will fetch for all in findByCriteria
+            userId = targetUserId;
         }
 
-        return financialRecordRepository.findByCriteria(userId, type, category, notes, startDate, endDate, pageable);
+        return financialRecordRepository.findByCriteria(userId, type, category, notes, pageable);
     }
 
     public FinancialRecord getRecordById(Long id, User user) {
         FinancialRecord record = financialRecordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Record not found"));
 
-        // Only ADMIN/ANALYST or owner can view record
         if (user.getRole() != Role.ADMIN && user.getRole() != Role.ANALYST && !record.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException("Access denied to this record.");
         }
-
         return record;
     }
-
+    
     @Transactional
     public FinancialRecord updateRecord(Long id, FinancialRecordDTO dto, User user) {
         if (user.getRole() != Role.ADMIN) {
@@ -84,7 +99,7 @@ public class FinancialRecordService {
 
         record.setAmount(dto.getAmount());
         record.setType(dto.getType());
-        record.setCategory(dto.getCategory());
+        record.setCategory(normalizeCategory(dto.getCategory()));
         record.setDate(dto.getDate());
         record.setNotes(dto.getNotes());
 
@@ -103,13 +118,8 @@ public class FinancialRecordService {
         financialRecordRepository.delete(record);
     }
 
-    // Summary Logics for Dashboard
-    public Map<String, Object> getFinancialSummary(User user) {
-        Long userId = user.getId();
-        // Analysts see summary for everyone (userId = null)
-        if (user.getRole() == Role.ANALYST || user.getRole() == Role.ADMIN) {
-             userId = null;
-        }
+    public Map<String, Object> getFinancialSummary(User user, Long targetUserId) {
+        Long userId = targetUserId;
 
         BigDecimal totalIncome = financialRecordRepository.sumIncomeByUserId(userId);
         BigDecimal totalExpense = financialRecordRepository.sumExpenseByUserId(userId);
@@ -127,11 +137,8 @@ public class FinancialRecordService {
         );
     }
 
-    public List<Map<String, Object>> getCategorySummary(User user) {
-        Long userId = user.getId();
-        if (user.getRole() == Role.ANALYST || user.getRole() == Role.ADMIN) {
-             userId = null;
-        }
+    public List<Map<String, Object>> getCategorySummary(User user, Long targetUserId) {
+        Long userId = targetUserId;
         return financialRecordRepository.sumByCategoryByUserId(userId);
     }
 
@@ -142,31 +149,11 @@ public class FinancialRecordService {
             users = users.stream().filter(u -> u.getRole() == filterRole).collect(Collectors.toList());
         }
 
-        LocalDate now = LocalDate.now();
-        LocalDate startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
-
         return users.stream().map(u -> {
-            BigDecimal totalIncome = financialRecordRepository.sumIncomeByUserId(u.getId());
-            BigDecimal totalExpense = financialRecordRepository.sumExpenseByUserId(u.getId());
-            BigDecimal monthlyIncome = financialRecordRepository.sumIncomeByUserIdInDateRange(u.getId(), startOfMonth, endOfMonth);
-            BigDecimal monthlyExpense = financialRecordRepository.sumExpenseByUserIdInDateRange(u.getId(), startOfMonth, endOfMonth);
-            List<Map<String, Object>> categories = financialRecordRepository.sumByCategoryByUserId(u.getId());
-
-            totalIncome = totalIncome != null ? totalIncome : BigDecimal.ZERO;
-            totalExpense = totalExpense != null ? totalExpense : BigDecimal.ZERO;
-            monthlyIncome = monthlyIncome != null ? monthlyIncome : BigDecimal.ZERO;
-            monthlyExpense = monthlyExpense != null ? monthlyExpense : BigDecimal.ZERO;
-
             return UserFinancialSummaryDTO.builder()
+                    .userId(u.getId())
                     .username(u.getUsername())
                     .role(u.getRole())
-                    .totalIncome(totalIncome)
-                    .totalExpenses(totalExpense)
-                    .netBalance(totalIncome.subtract(totalExpense))
-                    .monthlyIncome(monthlyIncome)
-                    .monthlyExpenses(monthlyExpense)
-                    .categorySummary(categories)
                     .build();
         }).collect(Collectors.toList());
     }
