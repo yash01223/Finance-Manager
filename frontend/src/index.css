@@ -1,53 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #3B82F6;
+  --color-primary: #A3E635;
   --color-success: #10B981;
   --color-danger: #EF4444;
-  --color-dark: #111827;
-  --color-bg: #FFFFFF;
-  --color-cream: #F9FAFB;
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --color-dark: #0A0A0A;
+  --color-bg: #000000;
+  --color-cream: #FFFFFF;
+  --font-sans: "Outfit", system-ui, -apple-system, sans-serif;
 }
 
 :root {
-  background-color: #FFFFFF;
-  color: #111827;
+  background-color: #000000;
+  color: #FFFFFF;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   background-color: var(--color-bg);
-  color: var(--color-dark);
+  color: var(--color-cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 @layer base {
   * {
-    @apply border-dark/5;
+    @apply border-white/5;
   }
 }
 
 @layer components {
   .card-shadow {
-    box-shadow: 0 10px 30px -10px rgba(0, 21, 20, 0.05);
+    box-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.4);
   }
   
   .glass-header {
-    @apply sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-dark/5;
+    @apply sticky top-0 z-50 bg-black/60 backdrop-blur-xl border-b border-white/5;
   }
   
   .input-field {
-    @apply w-full border border-dark/5 p-4 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all bg-dark/[0.02] text-dark placeholder-dark/20 font-bold;
+    @apply w-full border border-white/5 p-4 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all bg-white/[0.03] text-white placeholder-white/20 font-bold;
   }
 
   .btn-primary {
-    @apply bg-primary text-white font-black py-4 px-8 rounded-2xl hover:bg-primary/90 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 uppercase tracking-widest text-xs border border-primary/20;
+    @apply bg-primary text-black font-black py-4 px-8 rounded-2xl hover:bg-primary/90 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 uppercase tracking-widest text-xs border border-primary/20;
   }
   
   .btn-outline {
-    @apply border border-dark/10 font-bold py-2 px-4 rounded-xl hover:bg-dark/5 active:scale-95 transition-all text-dark/70;
+    @apply border border-white/10 font-bold py-2 px-4 rounded-xl hover:bg-white/5 active:scale-95 transition-all text-white/50;
   }
 }

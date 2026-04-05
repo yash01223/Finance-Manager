@@ -86,89 +86,33 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-white text-dark">
-            {/* Sidebar */}
-            <aside className="w-72 bg-dark border-r border-dark/5 flex flex-col sticky top-0 h-screen shadow-2xl shadow-dark/20">
-                <div className="p-8 pb-12">
-                    <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => navigate('/dashboard')}>
-                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white transition-transform group-hover:scale-110 shadow-lg shadow-primary/20">
-                            <Wallet size={20} />
-                        </div>
-                        <span className="text-xl font-black tracking-tighter uppercase text-cream">Finance.</span>
-                    </div>
-                </div>
-
-                <nav className="flex-1 px-4 space-y-1">
-                    <button 
-                        onClick={() => navigate('/dashboard')}
-                        className={`flex items-center space-x-3 w-full px-4 py-3 rounded-xl font-bold transition-all border ${!targetUserId ? 'bg-primary/10 text-primary border-primary/10' : 'text-cream/40 hover:text-cream hover:bg-white/5 border-transparent'}`}
-                    >
-                        <LayoutDashboard size={20} />
-                        <span className="text-sm">Dashboard</span>
-                    </button>
-                    {role !== 'VIEWER' && (
-                        <button 
-                            onClick={() => navigate('/records')}
-                            className="flex items-center space-x-3 w-full px-4 py-3 text-cream/40 hover:text-cream hover:bg-white/5 rounded-xl font-bold transition-all border border-transparent"
-                        >
-                            <FileText size={20} />
-                            <span className="text-sm">Records</span>
-                        </button>
-                    )}
-                    {role === 'ADMIN' && (
-                        <button 
-                            onClick={() => navigate('/users')}
-                            className="flex items-center space-x-3 w-full px-4 py-3 text-cream/40 hover:text-cream hover:bg-white/5 rounded-xl font-bold transition-all border border-transparent"
-                        >
-                            <Shield size={20} />
-                            <span className="text-sm">Users</span>
-                        </button>
-                    )}
-                </nav>
-
-                <div className="p-4 mt-auto">
-                    <div className="bg-white/5 rounded-2xl p-4 mb-4 border border-white/5">
-                        <div className="flex items-center space-x-3 mb-1">
-                            <div className="w-8 h-8 rounded-full bg-white/10 border border-white/5 flex items-center justify-center">
-                                <User size={14} className="text-cream/60" />
-                            </div>
-                            <span className="text-xs font-bold uppercase tracking-tight text-cream/70">{username}</span>
-                        </div>
-                        <span className="text-[10px] font-black uppercase text-cream/30 ml-11">{role}</span>
-                    </div>
-                    <button 
-                        onClick={handleLogout}
-                        className="flex items-center space-x-3 w-full px-4 py-3 text-danger/80 hover:bg-danger/10 rounded-xl font-bold transition-all border border-transparent"
-                    >
-                        <LogOut size={20} />
-                        <span className="text-sm">Sign Out</span>
-                    </button>
-                </div>
-            </aside>
-
-            {/* Main Content */}
-            <main className="flex-1 bg-white">
-                {/* Header */}
-                <header className="glass-header px-12 py-6 flex justify-between items-center">
+        <div className="min-h-screen bg-black text-white selection:bg-primary selection:text-black">
+            <main className="max-w-7xl mx-auto px-6 sm:px-12 py-12">
+                {/* Header Section */}
+                <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <div className="flex items-center space-x-3 mb-1">
-                            <h1 className="text-3xl font-black tracking-tight text-dark uppercase">
-                                {targetUserId ? "User Analytics" : "Financial Overview"}
-                            </h1>
-                            {targetUserId && (
-                                <button 
-                                    onClick={handleClearFilter}
-                                    className="px-3 py-1 bg-dark/5 text-[10px] font-black uppercase tracking-widest text-dark/40 rounded-lg hover:bg-dark hover:text-white transition-all flex items-center space-x-2"
-                                >
-                                    <RefreshCw size={10} /> <span>Reset Filter</span>
-                                </button>
-                            )}
+                        <div className="flex items-center space-x-4 mb-4">
+                            <div className="h-px w-12 bg-primary/30" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Dashboard</span>
                         </div>
-                        <div className="flex items-center space-x-6">
-                            <p className="text-sm text-dark/40 font-medium">
-                                {targetUserId ? `Viewing analytics for ${targetUsername}` : "Aggregated system statistics"}
-                            </p>
-                        </div>
+                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase leading-[0.9]">
+                            {targetUserId ? "User" : "Finance"}<br />
+                            <span className="text-primary italic">Overview.</span>
+                        </h1>
+                    </div>
+                    
+                    <div className="flex flex-col items-start md:items-end gap-3">
+                        <p className="text-sm text-white/40 font-bold uppercase tracking-wider max-w-xs md:text-right">
+                            {targetUserId ? `Viewing financial data for ${targetUsername}` : "Monitor your balance and transaction history"}
+                        </p>
+                        {targetUserId && (
+                            <button 
+                                onClick={handleClearFilter}
+                                className="px-4 py-2 bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/40 rounded-full hover:bg-primary hover:text-black hover:border-primary transition-all flex items-center space-x-2"
+                            >
+                                <RefreshCw size={12} /> <span>Global View</span>
+                            </button>
+                        )}
                     </div>
                 </header>
 
@@ -176,133 +120,137 @@ const Dashboard = () => {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="px-12 py-10"
+                    className="space-y-12"
                 >
                     {/* Metrics Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-                        <motion.div variants={itemVariants} className="bg-white p-7 rounded-[2rem] border border-dark/5 shadow-2xl shadow-dark/5">
-                            <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6">
-                                <Wallet size={24} />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <motion.div variants={itemVariants} className="bg-white/5 p-10 rounded-[3rem] border border-white/5 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 transition-colors group-hover:bg-primary/10" />
+                            <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-8">Net Balance</div>
+                            <div className="text-5xl font-black text-white tracking-tighter mb-4">₹{summary.netBalance.toLocaleString()}</div>
+                            <div className="flex items-center text-[10px] font-black uppercase tracking-widest text-primary/60">
+                                <Wallet size={12} className="mr-2" /> Total Balance
                             </div>
-                            <div className="text-sm font-bold text-dark/40 uppercase tracking-widest mb-1">Net Balance</div>
-                            <div className="text-4xl font-black text-dark tracking-tight">₹{summary.netBalance.toLocaleString()}</div>
                         </motion.div>
 
-                        <motion.div variants={itemVariants} className="bg-white p-7 rounded-[2rem] border border-dark/5 shadow-2xl shadow-dark/5">
-                            <div className="w-12 h-12 bg-success/10 text-success rounded-2xl flex items-center justify-center mb-6">
-                                <TrendingUp size={24} />
+                        <motion.div variants={itemVariants} className="bg-white/5 p-10 rounded-[3rem] border border-white/5 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-success/5 rounded-full blur-3xl -mr-16 -mt-16 transition-colors group-hover:bg-success/10" />
+                            <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-8">Total Income</div>
+                            <div className="text-5xl font-black text-success tracking-tighter mb-4">₹{summary.totalIncome.toLocaleString()}</div>
+                            <div className="flex items-center text-[10px] font-black uppercase tracking-widest text-success/60">
+                                <TrendingUp size={12} className="mr-2" /> Income
                             </div>
-                            <div className="text-sm font-bold text-dark/40 uppercase tracking-widest mb-1">Total Income</div>
-                            <div className="text-4xl font-black text-success tracking-tight">₹{summary.totalIncome.toLocaleString()}</div>
                         </motion.div>
 
-                        <motion.div variants={itemVariants} className="bg-white p-7 rounded-[2rem] border border-dark/5 shadow-2xl shadow-dark/5">
-                            <div className="w-12 h-12 bg-danger/10 text-danger rounded-2xl flex items-center justify-center mb-6">
-                                <TrendingDown size={24} />
+                        <motion.div variants={itemVariants} className="bg-white/5 p-10 rounded-[3rem] border border-white/5 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-danger/5 rounded-full blur-3xl -mr-16 -mt-16 transition-colors group-hover:bg-danger/10" />
+                            <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-8">Total Expenses</div>
+                            <div className="text-5xl font-black text-danger tracking-tighter mb-4">₹{summary.totalExpenses.toLocaleString()}</div>
+                            <div className="flex items-center text-[10px] font-black uppercase tracking-widest text-danger/60">
+                                <TrendingDown size={12} className="mr-2" /> Expenses
                             </div>
-                            <div className="text-sm font-bold text-dark/40 uppercase tracking-widest mb-1">Expenses</div>
-                            <div className="text-4xl font-black text-danger tracking-tight">₹{summary.totalExpenses.toLocaleString()}</div>
                         </motion.div>
                     </div>
 
                     {/* Charts & Activity Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                         {/* Weekly Trends Line Chart */}
-                        <motion.div variants={itemVariants} className="bg-white p-8 rounded-[2.5rem] border border-dark/5 shadow-2xl shadow-dark/5">
-                            <div className="flex justify-between items-center mb-8">
+                        <motion.div variants={itemVariants} className="bg-white/5 p-10 rounded-[3rem] border border-white/5">
+                            <div className="flex justify-between items-center mb-10">
                                 <div>
-                                    <h3 className="text-lg font-black text-dark tracking-tight uppercase">Weekly Trends</h3>
-                                    <p className="text-xs text-dark/40 font-bold uppercase tracking-wider">Income vs Expenses (8 Weeks)</p>
+                                    <h3 className="text-xl font-black text-white tracking-tighter uppercase">Weekly Trends</h3>
+                                    <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.2em] mt-1">Income vs Expenses Analysis</p>
                                 </div>
-                                <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-6">
                                     <div className="flex items-center space-x-2">
-                                        <div className="w-3 h-3 rounded-full bg-success" />
-                                        <span className="text-[10px] font-black text-dark/30 uppercase">Income</span>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">In</span>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        <div className="w-3 h-3 rounded-full bg-danger" />
-                                        <span className="text-[10px] font-black text-dark/30 uppercase">Expense</span>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-danger" />
+                                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Out</span>
                                     </div>
                                 </div>
                             </div>
                             <div className="h-[300px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={trendsData}>
-                                        <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="rgba(0,21,20,0.05)" />
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(0,21,20,0.3)', fontWeight: '800', fontSize: 10 }} dy={10} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(0,21,20,0.3)', fontWeight: '800', fontSize: 10 }} />
+                                        <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.2)', fontWeight: '900', fontSize: 10 }} dy={10} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.2)', fontWeight: '900', fontSize: 10 }} />
                                         <Tooltip 
-                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.05)', background: '#FFFFFF' }}
-                                            itemStyle={{ fontWeight: '900', textTransform: 'uppercase', fontSize: '12px', color: '#111827' }}
+                                            contentStyle={{ borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', background: '#0A0A0A' }}
+                                            itemStyle={{ fontWeight: '900', textTransform: 'uppercase', fontSize: '10px', color: '#FFFFFF' }}
+                                            cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 2 }}
                                         />
-                                        <Line type="monotone" dataKey="income" stroke="#10B981" strokeWidth={4} dot={{ r: 4, strokeWidth: 2, fill: '#FFFFFF' }} activeDot={{ r: 6 }} />
-                                        <Line type="monotone" dataKey="expense" stroke="#EF4444" strokeWidth={4} dot={{ r: 4, strokeWidth: 2, fill: '#FFFFFF' }} activeDot={{ r: 6 }} />
+                                        <Line type="monotone" dataKey="income" stroke="#10B981" strokeWidth={5} dot={false} activeDot={{ r: 6, fill: '#10B981', strokeWidth: 2, stroke: '#000000' }} />
+                                        <Line type="monotone" dataKey="expense" stroke="#EF4444" strokeWidth={5} dot={false} activeDot={{ r: 6, fill: '#EF4444', strokeWidth: 2, stroke: '#000000' }} />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
                         </motion.div>
 
                         {/* Recent Activity Panel */}
-                        <motion.div variants={itemVariants} className="bg-white p-8 rounded-[2.5rem] border border-dark/5 shadow-2xl shadow-dark/5 flex flex-col">
-                            <div className="flex justify-between items-center mb-8">
+                        <motion.div variants={itemVariants} className="bg-white/5 p-10 rounded-[3rem] border border-white/5 flex flex-col">
+                            <div className="flex justify-between items-center mb-10">
                                 <div>
-                                    <h3 className="text-lg font-black text-dark tracking-tight uppercase">Recent Activity</h3>
-                                    <p className="text-xs text-dark/40 font-bold uppercase tracking-wider">Latest 10 transactions</p>
+                                    <h3 className="text-xl font-black text-white tracking-tighter uppercase">Recent History</h3>
+                                    <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.2em] mt-1">Latest transactions</p>
                                 </div>
-                                <button onClick={() => navigate('/records')} className="p-2 bg-dark/5 text-dark/40 rounded-xl hover:bg-dark hover:text-white transition-all">
-                                    <Clock size={18} />
+                                <button onClick={() => navigate('/records')} className="w-10 h-10 bg-white/5 text-white/20 rounded-full flex items-center justify-center hover:bg-primary hover:text-black transition-all">
+                                    <Clock size={16} />
                                 </button>
                             </div>
                             <div className="flex-1 overflow-hidden">
-                                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                     {recentActivity.map((act) => (
-                                        <div key={act.id} className="flex items-center justify-between p-4 bg-dark/5 rounded-2xl border border-transparent hover:border-dark/10 hover:bg-white transition-all group shadow-sm">
-                                            <div className="flex items-center space-x-4">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-[10px] ${act.type === 'INCOME' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
+                                        <div key={act.id} className="flex items-center justify-between p-5 bg-white/[0.02] rounded-[2rem] border border-white/5 hover:border-primary/20 hover:bg-white/[0.05] transition-all group">
+                                            <div className="flex items-center space-x-5">
+                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xs ${act.type === 'INCOME' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
                                                     {act.category.substring(0, 2).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <div className="text-sm font-black text-dark leading-none mb-1">{act.category}</div>
-                                                    <div className="text-[10px] font-bold text-dark/30 uppercase tracking-tight">{act.date}</div>
+                                                    <div className="text-sm font-black text-white leading-none mb-2 uppercase">{act.category}</div>
+                                                    <div className="text-[10px] font-black text-white/20 uppercase tracking-widest">{act.date}</div>
                                                 </div>
                                             </div>
-                                            <div className={`text-sm font-black ${act.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>
+                                            <div className={`text-base font-black tracking-tighter ${act.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>
                                                 {act.type === 'INCOME' ? '+' : '-'}₹{act.amount.toLocaleString()}
                                             </div>
                                         </div>
                                     ))}
                                     {recentActivity.length === 0 && (
-                                        <div className="h-full flex items-center justify-center text-xs font-black text-dark/10 uppercase tracking-widest py-10">No recent activity</div>
+                                        <div className="h-full flex items-center justify-center text-[10px] font-black text-white/10 uppercase tracking-[0.4em] py-20">No active stream</div>
                                     )}
                                 </div>
                             </div>
                         </motion.div>
 
                         {/* Spending Analytics Chart */}
-                        <motion.div variants={itemVariants} className="lg:col-span-2 bg-white p-10 rounded-[2.5rem] border border-dark/5 shadow-2xl shadow-dark/5">
-                            <div className="flex justify-between items-center mb-10">
+                        <motion.div variants={itemVariants} className="lg:col-span-2 bg-white/5 p-12 rounded-[4rem] border border-white/5">
+                            <div className="flex justify-between items-center mb-16">
                                 <div>
-                                    <h3 className="text-xl font-black text-dark tracking-tight uppercase">Spending Analytics</h3>
-                                    <p className="text-sm text-dark/40 font-bold uppercase tracking-wider">
-                                        {targetUserId ? `Specific categories for ${targetUsername}` : "Aggregated category distribution"}
+                                    <h3 className="text-3xl font-black text-white tracking-tighter uppercase">Spending Analysis</h3>
+                                    <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em] mt-2">
+                                        {targetUserId ? `Categorized records for ${targetUsername}` : "Breakdown of your spending and income by category"}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="h-[300px] w-full">
+                            <div className="h-[400px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={categoryData} barCategoryGap={40}>
-                                        <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="rgba(0,21,20,0.05)" />
-                                        <XAxis dataKey="category" axisLine={false} tickLine={false} tick={{ fill: 'rgba(0,21,20,0.3)', fontWeight: 'bold', fontSize: 12 }} dy={10} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(0,21,20,0.3)', fontWeight: 'bold', fontSize: 12 }} />
+                                    <BarChart data={categoryData} barGap={12}>
+                                        <CartesianGrid strokeDasharray="12 12" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                                        <XAxis dataKey="category" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.2)', fontWeight: '900', fontSize: 10, textTransform: 'uppercase' }} dy={15} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.2)', fontWeight: '900', fontSize: 10 }} />
                                         <Tooltip 
-                                            cursor={{ fill: 'rgba(0, 21, 20, 0.02)' }} 
-                                            contentStyle={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)', padding: '12px' }}
-                                            itemStyle={{ color: '#111827', fontWeight: '800' }}
+                                            cursor={{ fill: 'rgba(255,255,255,0.02)' }} 
+                                            contentStyle={{ backgroundColor: '#0A0A0A', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', padding: '16px' }}
+                                            itemStyle={{ color: '#FFFFFF', fontWeight: '900', fontSize: '10px', textTransform: 'uppercase' }}
                                         />
-                                        < Bar dataKey="total" radius={[8, 8, 0, 0]} barSize={32}>
+                                        <Bar dataKey="total" radius={[12, 12, 0, 0]} barSize={40}>
                                             {categoryData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#3B82F6' : 'rgba(59, 130, 246, 0.6)'} />
+                                                <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#A3E635' : 'rgba(163, 230, 53, 0.4)'} />
                                             ))}
                                         </Bar>
                                     </BarChart>

@@ -123,234 +123,161 @@ const Records = () => {
     if (role === 'VIEWER') return null;
 
     return (
-        <div className="flex min-h-screen bg-white">
-            {/* Sidebar */}
-            <aside className="w-72 bg-dark border-r border-dark/5 flex flex-col sticky top-0 h-screen shadow-2xl shadow-dark/20">
-                <div className="p-8 pb-12">
-                    <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => navigate('/dashboard')}>
-                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white transition-transform group-hover:scale-110 shadow-lg shadow-primary/20">
-                            <Wallet size={20} />
-                        </div>
-                        <span className="text-xl font-black tracking-tighter uppercase text-cream">Finance.</span>
-                    </div>
-                </div>
-
-                <nav className="flex-1 px-4 space-y-1">
-                    <button onClick={() => navigate('/dashboard')} className="flex items-center space-x-3 w-full px-4 py-3 text-cream/40 hover:text-cream hover:bg-white/5 rounded-xl font-bold transition-all border border-transparent">
-                        <LayoutDashboard size={20} />
-                        <span className="text-sm">Dashboard</span>
-                    </button>
-                    <button className="flex items-center space-x-3 w-full px-4 py-3 bg-primary/10 text-primary rounded-xl font-bold transition-all border border-primary/10">
-                        <FileText size={20} />
-                        <span className="text-sm">Records</span>
-                    </button>
-                    {role === 'ADMIN' && (
-                        <button 
-                            onClick={() => navigate('/users')}
-                            className="flex items-center space-x-3 w-full px-4 py-3 text-cream/40 hover:text-cream hover:bg-white/5 rounded-xl font-bold transition-all border border-transparent"
-                        >
-                            <Shield size={20} />
-                            <span className="text-sm">Users</span>
-                        </button>
-                    )}
-                </nav>
-
-                <div className="p-4 mt-auto">
-                    <div className="bg-white/5 rounded-2xl p-4 mb-4 border border-white/5">
-                        <div className="flex items-center space-x-3 mb-1">
-                            <div className="w-8 h-8 rounded-full bg-white/10 border border-white/5 flex items-center justify-center">
-                                <UsersIcon size={14} className="text-cream/60" />
-                            </div>
-                            <span className="text-xs font-bold uppercase tracking-tight text-cream/70">{username}</span>
-                        </div>
-                        <span className="text-[10px] font-black uppercase text-cream/30 ml-11">{role}</span>
-                    </div>
-                    <button onClick={handleLogout} className="flex items-center space-x-3 w-full px-4 py-3 text-danger/80 hover:bg-danger/10 rounded-xl font-bold transition-all border border-transparent">
-                        <LogOut size={20} />
-                        <span className="text-sm">Sign Out</span>
-                    </button>
-                </div>
-            </aside>
-
-            {/* Main Content */}
-            <main className="flex-1 bg-white">
-                {/* Header */}
-                <header className="glass-header px-12 py-6 flex justify-between items-center">
+        <div className="min-h-screen bg-black text-white selection:bg-primary selection:text-black">
+            <main className="max-w-7xl mx-auto px-6 sm:px-12 py-12">
+                {/* Header Section */}
+                <header className="mb-16 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                     <div>
-                        <div className="flex items-center space-x-3 mb-1">
-                            <h1 className="text-3xl font-black tracking-tight text-dark uppercase">
-                                {viewMode === 'LOGS' ? (targetUserId ? `Records: ${targetUsername}` : "Transaction Logs") : "User Directory"}
-                            </h1>
+                        <div className="flex items-center space-x-4 mb-4">
+                            <div className="h-px w-12 bg-primary/30" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Transaction History</span>
+                        </div>
+                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase leading-[0.9]">
+                            {viewMode === 'LOGS' ? (targetUserId ? "User" : "System") : "User"}<br />
+                            <span className="text-primary italic">{viewMode === 'LOGS' ? "Records." : "List."}</span>
+                        </h1>
+                    </div>
+                    
+                    <div className="flex flex-col items-start lg:items-end gap-6">
+                        {(role === 'ADMIN' || role === 'ANALYST') && (
+                            <div className="bg-white/5 p-1 rounded-2xl flex border border-white/5 shadow-2xl shadow-black/40">
+                                <button
+                                    onClick={() => setViewMode('LOGS')}
+                                    className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'LOGS' ? 'bg-primary text-black' : 'text-white/40 hover:text-white'}`}
+                                >
+                                    Ledger
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('DIRECTORY')}
+                                    className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'DIRECTORY' ? 'bg-primary text-black' : 'text-white/40 hover:text-white'}`}
+                                >
+                                    Directory
+                                </button>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-4">
                             {targetUserId && viewMode === 'LOGS' && (
                                 <button
                                     onClick={handleClearSelection}
-                                    className="px-3 py-1 bg-dark/5 text-[10px] font-black uppercase tracking-widest text-dark/40 rounded-lg hover:bg-dark hover:text-white transition-all flex items-center space-x-2"
+                                    className="px-4 py-2 bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/40 rounded-full hover:bg-white hover:text-black transition-all flex items-center space-x-2"
                                 >
-                                    <RefreshCw size={10} /> <span>Reset to All</span>
+                                    <RefreshCw size={12} /> <span>Reset Filter</span>
+                                </button>
+                            )}
+                            {viewMode === 'LOGS' && !targetUserId && (role === 'ADMIN' || role === 'ANALYST') && (
+                                <button
+                                    onClick={() => setIsAdding(!isAdding)}
+                                    className="btn-primary flex items-center space-x-3"
+                                >
+                                    <Plus size={18} /> <span>Add Record</span>
                                 </button>
                             )}
                         </div>
-                        <p className="text-sm text-dark/40 font-medium">
-                            {viewMode === 'LOGS' ? (targetUserId ? `Viewing transaction specifics for ${targetUsername}` : "Browse and manage the financial ledger") : "Select a user to analyze their records"}
-                        </p>
-                    </div>
-
-                    <div className="flex items-center space-x-4">
-                        {(role === 'ADMIN' || role === 'ANALYST') && (
-                            <>
-                                <div className="bg-dark/5 p-1 rounded-xl flex space-x-1 mr-4">
-                                    <button
-                                        onClick={() => setViewMode('LOGS')}
-                                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${viewMode === 'LOGS' ? 'bg-white text-dark shadow-sm' : 'text-dark/30 hover:text-dark'}`}
-                                    >
-                                        Ledger
-                                    </button>
-                                    <button
-                                        onClick={() => setViewMode('DIRECTORY')}
-                                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${viewMode === 'DIRECTORY' ? 'bg-white text-dark shadow-sm' : 'text-dark/30 hover:text-dark'}`}
-                                    >
-                                        Directory
-                                    </button>
-                                </div>
-                                {viewMode === 'LOGS' && !targetUserId && (
-                                    <button
-                                        onClick={() => setIsAdding(!isAdding)}
-                                        className="bg-primary text-white font-bold py-3 px-6 rounded-xl flex items-center space-x-2 transition-all hover:bg-primary/90 active:scale-95 shadow-lg shadow-primary/20"
-                                    >
-                                        <Plus size={18} /> <span>New Record</span>
-                                    </button>
-                                )}
-                            </>
-                        )}
                     </div>
                 </header>
 
-                <div className="px-12 py-10">
+                <div className="space-y-12">
                     <AnimatePresence mode="wait">
                         {viewMode === 'LOGS' ? (
-                            <motion.div key="logs" variants={containerVariants} initial="hidden" animate="visible" exit="hidden">
-                                {/* Individual Logs UI */}
+                            <motion.div key="logs" variants={containerVariants} initial="hidden" animate="visible" exit="hidden" className="space-y-12">
+                                {/* Entry Form */}
                                 {isAdding && (
-                                    <div className="mb-10 p-8 bg-white rounded-[2rem] border border-dark/5 shadow-2xl shadow-dark/5">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <h3 className="font-black text-dark uppercase text-sm tracking-widest">Entry Details</h3>
-                                            <button onClick={() => setIsAdding(false)} className="text-dark/20 hover:text-dark">✕</button>
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="p-10 bg-white/5 rounded-[3rem] border border-white/10 shadow-2xl"
+                                    >
+                                        <div className="flex justify-between items-center mb-10">
+                                            <h3 className="text-xl font-black text-white tracking-tighter uppercase italic">New Record.</h3>
+                                            <button onClick={() => setIsAdding(false)} className="w-10 h-10 bg-white/5 text-white/20 rounded-full flex items-center justify-center hover:bg-danger hover:text-white transition-all">✕</button>
                                         </div>
-                                        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-dark/40 uppercase tracking-widest ml-1">Amount (INR)</label>
-                                                <input type="number" placeholder="0.00" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} className="w-full bg-dark/5 border border-dark/5 p-3 rounded-xl focus:bg-white focus:border-primary outline-none font-bold text-dark" required />
+                                        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                            <div className="space-y-3">
+                                                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ml-1">Amount</label>
+                                                <input type="number" placeholder="0.00" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} className="input-field" required />
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-dark/40 uppercase tracking-widest ml-1">Type</label>
-                                                <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })} className="w-full bg-dark/5 border border-dark/5 p-3 rounded-xl focus:bg-white focus:border-primary outline-none font-bold text-dark">
+                                            <div className="space-y-3">
+                                                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ml-1">Type</label>
+                                                <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })} className="input-field cursor-pointer">
                                                     <option value="INCOME">Income</option>
                                                     <option value="EXPENSE">Expense</option>
                                                 </select>
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-dark/40 uppercase tracking-widest ml-1">Category</label>
-                                                <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full bg-dark/5 border border-dark/5 p-3 rounded-xl focus:bg-white focus:border-primary outline-none font-bold text-dark" required>
+                                            <div className="space-y-3">
+                                                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ml-1">Category</label>
+                                                <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="input-field cursor-pointer" required>
                                                     {FIXED_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                                 </select>
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-dark/40 uppercase tracking-widest ml-1">Date</label>
-                                                <input type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} className="w-full bg-dark/5 border border-dark/5 p-3 rounded-xl focus:bg-white focus:border-primary outline-none font-bold text-dark" required />
+                                            <div className="space-y-3">
+                                                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ml-1">Date</label>
+                                                <input type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} className="input-field" required />
                                             </div>
-                                            <div className="md:col-span-3 space-y-2">
-                                                <label className="text-[10px] font-black text-dark/40 uppercase tracking-widest ml-1">Additional Notes</label>
-                                                <input type="text" placeholder="Extra details..." value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} className="w-full bg-dark/5 border border-dark/5 p-3 rounded-xl focus:bg-white focus:border-primary outline-none font-bold text-dark" />
+                                            <div className="md:col-span-3 space-y-3">
+                                                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ml-1">Notes</label>
+                                                <input type="text" placeholder="Transaction details..." value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} className="input-field" />
                                             </div>
                                             <div className="flex items-end">
-                                                <button type="submit" className="w-full bg-primary text-white font-bold py-3 px-4 rounded-xl hover:bg-primary/90 transition-all uppercase text-sm tracking-widest">Create Entry</button>
+                                                <button type="submit" className="btn-primary w-full shadow-lg shadow-primary/10">Add Record</button>
                                             </div>
                                         </form>
-                                    </div>
+                                    </motion.div>
                                 )}
 
-                                {/* Filter Bar */}
-                                <div className="bg-white p-6 rounded-2xl border border-dark/5 shadow-2xl shadow-dark/5 mb-8 flex flex-col xl:flex-row xl:items-center space-y-4 xl:space-y-0 xl:space-x-6 justify-between">
-                                    {/* Custom Date Range Picker */}
-                                    <div className="flex items-center space-x-2 bg-dark/5 p-1.5 rounded-xl border border-dark/5">
-                                        <div className="relative">
-                                            <input
-                                                type="date"
-                                                value={filter.startDate}
-                                                onChange={(e) => setFilter({ ...filter, startDate: e.target.value, page: 0 })}
-                                                className="bg-transparent border-none p-1.5 text-[11px] font-black uppercase tracking-tight outline-none cursor-pointer text-dark"
-                                            />
-                                            <span className="absolute -top-4 left-1 text-[9px] font-black text-dark/30 uppercase tracking-widest">From</span>
+                                {/* Precision Filtering */}
+                                <div className="bg-white/5 px-10 py-6 rounded-[3rem] border border-white/5 flex flex-col xl:flex-row xl:items-center gap-10 justify-between">
+                                    <div className="flex items-center gap-6">
+                                        <div className="relative group">
+                                            <input type="date" value={filter.startDate} onChange={(e) => setFilter({ ...filter, startDate: e.target.value, page: 0 })} className="bg-transparent border-b border-white/10 p-2 text-[11px] font-black uppercase tracking-widest focus:border-primary outline-none transition-all text-white" />
+                                            <span className="absolute -top-6 left-0 text-[8px] font-black text-white/20 uppercase tracking-[0.2em]">Start Date</span>
                                         </div>
-                                        <div className="text-dark/10 font-bold">→</div>
-                                        <div className="relative">
-                                            <input
-                                                type="date"
-                                                value={filter.endDate}
-                                                onChange={(e) => setFilter({ ...filter, endDate: e.target.value, page: 0 })}
-                                                className="bg-transparent border-none p-1.5 text-[11px] font-black uppercase tracking-tight outline-none cursor-pointer text-dark"
-                                            />
-                                            <span className="absolute -top-4 left-1 text-[9px] font-black text-dark/30 uppercase tracking-widest">To</span>
+                                        <div className="text-white/10 font-bold opacity-20">/</div>
+                                        <div className="relative group">
+                                            <input type="date" value={filter.endDate} onChange={(e) => setFilter({ ...filter, endDate: e.target.value, page: 0 })} className="bg-transparent border-b border-white/10 p-2 text-[11px] font-black uppercase tracking-widest focus:border-primary outline-none transition-all text-white" />
+                                            <span className="absolute -top-6 left-0 text-[8px] font-black text-white/20 uppercase tracking-[0.2em]">End Date</span>
                                         </div>
-                                        {(filter.startDate || filter.endDate) && (
-                                            <button
-                                                onClick={() => setFilter({ ...filter, startDate: '', endDate: '', page: 0 })}
-                                                className="p-1 px-2 text-[10px] font-black text-danger hover:text-danger/70 transition-colors uppercase ml-2"
-                                            >
-                                                Reset
-                                            </button>
-                                        )}
                                     </div>
 
-                                    <div className="flex space-x-4">
-                                        <select
-                                            value={filter.category}
-                                            onChange={(e) => setFilter({ ...filter, category: e.target.value, page: 0 })}
-                                            className="bg-white border border-dark/5 p-2.5 px-4 rounded-xl font-bold outline-none text-sm min-w-[140px] text-dark shadow-sm"
-                                        >
-                                            <option value="">All Categories</option>
-                                            {FIXED_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                    <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/5">
+                                        <select value={filter.category} onChange={(e) => setFilter({ ...filter, category: e.target.value, page: 0 })} className="bg-transparent px-6 py-2 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer text-white/60 hover:text-white transition-colors">
+                                            <option value="" className="bg-black text-white">Categories</option>
+                                            {FIXED_CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-black text-white">{cat}</option>)}
                                         </select>
-                                        <select
-                                            value={filter.type}
-                                            onChange={(e) => setFilter({ ...filter, type: e.target.value, page: 0 })}
-                                            className="bg-white border border-dark/5 p-2.5 px-4 rounded-xl font-bold outline-none text-sm min-w-[120px] text-dark shadow-sm"
-                                        >
-                                            <option value="">All Types</option>
-                                            <option value="INCOME">Income</option>
-                                            <option value="EXPENSE">Expense</option>
+                                        <div className="w-px h-6 bg-white/10 my-auto" />
+                                        <select value={filter.type} onChange={(e) => setFilter({ ...filter, type: e.target.value, page: 0 })} className="bg-transparent px-6 py-2 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer text-white/60 hover:text-white transition-colors">
+                                            <option value="" className="bg-black text-white">All Types</option>
+                                            <option value="INCOME" className="bg-black text-white">Income</option>
+                                            <option value="EXPENSE" className="bg-black text-white">Expense</option>
                                         </select>
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-[2rem] border border-dark/5 shadow-2xl shadow-dark/5 overflow-hidden">
+                                <div className="bg-white/5 rounded-[3rem] border border-white/5 overflow-hidden">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
-                                            <tr className="bg-dark/5 border-b border-dark/5">
-                                                <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em] w-32">Date</th>
-                                                <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em]">Category</th>
-                                                <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em]">Description</th>
-                                                <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em] text-right">Amount</th>
-                                                <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em] text-center">Status</th>
-                                                {role === 'ADMIN' && <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em] text-center">Actions</th>}
+                                            <tr className="bg-white/5 border-b border-white/5">
+                                                <th className="px-10 py-8 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] w-32">Date</th>
+                                                <th className="px-10 py-8 text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Category</th>
+                                                <th className="px-10 py-8 text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Notes</th>
+                                                <th className="px-10 py-8 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] text-right">Amount</th>
+                                                <th className="px-10 py-8 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] text-center">Status</th>
+                                                {role === 'ADMIN' && <th className="px-10 py-8 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] text-center">Actions</th>}
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-dark/5">
+                                        <tbody className="divide-y divide-white/5">
                                             {records.map((rec) => (
-                                                <tr key={rec.id} className="hover:bg-dark/5 transition-colors">
-                                                    <td className="p-6 font-bold text-dark/30 text-sm">{rec.date}</td>
-                                                    <td className="p-6"><div className="font-black text-dark text-sm uppercase tracking-tight">{rec.category}</div></td>
-                                                    <td className="p-6"><div className="text-dark/40 text-sm font-medium italic">{rec.notes || "No notes"}</div></td>
-                                                    <td className={`p-6 text-right font-black text-base ${rec.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>₹{rec.amount.toLocaleString()}</td>
-                                                    <td className="p-6 text-center">
-                                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${rec.type === 'INCOME' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
-                                                            {rec.type}
-                                                        </span>
+                                                <tr key={rec.id} className="hover:bg-white/[0.03] transition-colors group">
+                                                    <td className="px-10 py-8 text-[11px] font-black text-white/20 uppercase tracking-widest">{rec.date}</td>
+                                                    <td className="px-10 py-8"><div className="font-black text-white text-sm uppercase tracking-tighter">{rec.category}</div></td>
+                                                    <td className="px-10 py-8"><div className="text-white/40 text-xs font-bold italic tracking-wide">{rec.notes || "Empty Log Entry"}</div></td>
+                                                    <td className={`px-10 py-8 text-right font-black text-lg tracking-tighter ${rec.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>₹{rec.amount.toLocaleString()}</td>
+                                                    <td className="px-10 py-8 text-center">
+                                                        <div className={`mx-auto w-2 h-2 rounded-full ${rec.type === 'INCOME' ? 'bg-success' : 'bg-danger'} shadow-[0_0_12px_rgba(0,0,0,0.5)]`} title={rec.type} />
                                                     </td>
                                                     {role === 'ADMIN' && (
-                                                        <td className="p-6 text-center">
-                                                            <button onClick={() => handleDelete(rec.id)} className="w-8 h-8 rounded-lg bg-danger/10 text-danger flex items-center justify-center mx-auto hover:bg-danger hover:text-white transition-all">
-                                                                <Trash2 size={14} />
+                                                        <td className="px-10 py-8 text-center text-white/10 group-hover:text-danger transition-colors">
+                                                            <button onClick={() => handleDelete(rec.id)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mx-auto hover:bg-danger hover:text-white transition-all border border-transparent hover:border-danger/10">
+                                                                <Trash2 size={16} />
                                                             </button>
                                                         </td>
                                                     )}
@@ -360,68 +287,69 @@ const Records = () => {
                                     </table>
                                 </div>
                                 
-                                {/* Pagination */}
-                                <div className="flex justify-between items-center mt-10">
-                                    <div className="text-xs font-bold text-dark/30 uppercase tracking-widest">Page {filter.page + 1} of {totalPages}</div>
-                                    <div className="flex space-x-3">
-                                        <button disabled={filter.page === 0} onClick={() => setFilter({ ...filter, page: filter.page - 1 })} className="p-3 border border-dark/10 rounded-xl disabled:opacity-20 hover:bg-dark hover:text-white transition-all"><ArrowLeft size={18} /></button>
-                                        <button disabled={filter.page + 1 >= totalPages} onClick={() => setFilter({ ...filter, page: filter.page + 1 })} className="p-3 border border-dark/10 rounded-xl disabled:opacity-20 hover:bg-dark hover:text-white transition-all"><ArrowRight size={18} /></button>
+                                {/* Global Pagination */}
+                                <div className="flex justify-between items-center bg-white/5 p-8 rounded-[2rem] border border-white/5">
+                                    <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Page {filter.page + 1} of {totalPages}</div>
+                                    <div className="flex space-x-6">
+                                        <button disabled={filter.page === 0} onClick={() => setFilter({ ...filter, page: filter.page - 1 })} className="w-14 h-14 bg-white/5 border border-white/10 rounded-full flex items-center justify-center disabled:opacity-10 hover:bg-white hover:text-black hover:scale-110 transition-all"><ArrowLeft size={20} /></button>
+                                        <button disabled={filter.page + 1 >= totalPages} onClick={() => setFilter({ ...filter, page: filter.page + 1 })} className="w-14 h-14 bg-white/5 border border-white/10 rounded-full flex items-center justify-center disabled:opacity-10 hover:bg-white hover:text-black hover:scale-110 transition-all"><ArrowRight size={20} /></button>
                                     </div>
                                 </div>
                             </motion.div>
                         ) : (
-                            <motion.div key="directory" variants={containerVariants} initial="hidden" animate="visible" exit="hidden">
-                                {/* Directory Selection UI */}
-                                <div className="bg-white p-6 rounded-2xl border border-dark/5 shadow-2xl shadow-dark/5 mb-8 flex justify-between items-center">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
-                                            <UsersIcon size={18} />
+                            <motion.div key="directory" variants={containerVariants} initial="hidden" animate="visible" exit="hidden" className="space-y-12">
+                                {/* Role Navigation */}
+                                <div className="bg-white/5 px-10 py-6 rounded-[3rem] border border-white/5 flex justify-between items-center">
+                                    <div className="flex items-center space-x-6">
+                                        <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
+                                            <UsersIcon size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-black text-dark uppercase text-xs tracking-[0.2em]">Select User Context</h3>
-                                            <p className="text-[10px] text-dark/40 font-bold uppercase mt-0.5">Choose a user to view their specific financial records</p>
+                                            <h3 className="text-xl font-black text-white tracking-tighter uppercase italic">User Directory.</h3>
+                                            <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.2em] mt-1">Select a user to filter records</p>
                                         </div>
                                     </div>
                                     <select
                                         value={selectedRole}
                                         onChange={(e) => setSelectedRole(e.target.value)}
-                                        className="bg-dark/5 border border-dark/5 p-3 px-6 rounded-xl font-black text-xs uppercase tracking-widest outline-none cursor-pointer hover:bg-white transition-all text-dark"
+                                        className="bg-white/5 border border-white/10 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] outline-none cursor-pointer hover:bg-white hover:text-black transition-all text-white/60"
                                     >
-                                        <option value="">All Roles</option>
-                                        <option value="ADMIN">Admins</option>
-                                        <option value="ANALYST">Analysts</option>
-                                        <option value="VIEWER">Viewers</option>
+                                        <option value="" className="bg-black text-white">All Roles</option>
+                                        <option value="ADMIN" className="bg-black text-white">Administrators</option>
+                                        <option value="ANALYST" className="bg-black text-white">Data Analysts</option>
+                                        <option value="VIEWER" className="bg-black text-white">Read-Only Viewers</option>
                                     </select>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {userDirectory.map((u, idx) => (
                                         <motion.div
                                             key={idx}
-                                            whileHover={{ y: -5 }}
-                                            className="bg-white p-6 rounded-3xl border border-dark/5 shadow-2xl shadow-dark/5 flex items-center justify-between group"
+                                            whileHover={{ y: -8, scale: 1.02 }}
+                                            className="bg-white/5 p-10 rounded-[4rem] border border-white/5 flex flex-col gap-10 relative overflow-hidden group shadow-2xl"
                                         >
-                                            <div className="flex items-center space-x-4">
-                                                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-extrabold text-sm">
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/20 transition-all" />
+                                            
+                                            <div className="flex items-center space-x-6">
+                                                <div className="w-16 h-16 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center text-primary font-black text-xl tracking-tighter group-hover:bg-primary group-hover:text-black transition-all">
                                                     {u.username.substring(0, 2).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-black text-dark tracking-tight">{u.username}</h4>
-                                                    <span className="text-[9px] font-black uppercase text-dark/30 tracking-widest border border-dark/5 px-2 py-0.5 rounded-md">{u.role}</span>
+                                                    <h4 className="text-2xl font-black text-white tracking-tighter uppercase">{u.username}</h4>
+                                                    <div className="mt-2 inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">{u.role}</div>
                                                 </div>
                                             </div>
-                                            <div className="flex space-x-2">
+
+                                            <div className="flex gap-4">
                                                 <button
                                                     onClick={() => handleSelectUserRecords(u)}
-                                                    className="w-10 h-10 bg-dark/5 text-dark/40 rounded-xl flex items-center justify-center hover:bg-dark hover:text-white transition-all shadow-sm"
-                                                    title="View Transaction Logs"
+                                                    className="flex-1 py-4 bg-white/5 border border-white/5 rounded-[2rem] text-[10px] font-black uppercase tracking-widest text-white/40 hover:bg-white hover:text-black transition-all flex items-center justify-center gap-3"
                                                 >
-                                                    <UserCheck size={18} />
+                                                    <UserCheck size={16} /> Ledger
                                                 </button>
                                                 <button
                                                     onClick={() => handleViewDashboardAnalytics(u)}
-                                                    className="w-10 h-10 bg-info text-dark rounded-xl flex items-center justify-center hover:bg-info/80 transition-all shadow-lg shadow-info/20"
-                                                    title="View Dashboard Totals"
+                                                    className="w-20 py-4 bg-primary/10 border border-primary/20 rounded-[2rem] text-primary flex items-center justify-center hover:bg-primary hover:text-black transition-all"
                                                 >
                                                     <BarChart3 size={18} />
                                                 </button>
@@ -429,7 +357,7 @@ const Records = () => {
                                         </motion.div>
                                     ))}
                                     {userDirectory.length === 0 && !loading && (
-                                        <div className="col-span-full py-20 text-center font-black text-dark/10 uppercase tracking-widest border-2 border-dashed border-dark/5 rounded-[3rem]">No users available in directory</div>
+                                        <div className="col-span-full py-40 text-center font-black text-white/5 text-4xl uppercase tracking-[0.5em] border-4 border-dashed border-white/5 rounded-[5rem]">Directory Empty.</div>
                                     )}
                                 </div>
                             </motion.div>
