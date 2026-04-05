@@ -4,45 +4,34 @@ import com.finance.finance_manager.dto.UserDTO;
 import com.finance.finance_manager.entity.Role;
 import com.finance.finance_manager.entity.User;
 import com.finance.finance_manager.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@Tag(name = "User Management", description = "Admin-only endpoints for managing user roles and accounts")
+@Tag(name = "2. User Management (UserController)", description = "Endpoints for managing users (Admin only)")
 public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "Get all users", description = "Retrieves a list of all registered users. Restrited to ADMIN role.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved users"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Requires ADMIN role")
-    })
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get all users", description = "Retrieves a list of all registered users. Requires ADMIN role.")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @Operation(summary = "Update user role", description = "Changes the role of a specific user. Restricted to ADMIN role.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Role updated successfully"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Requires ADMIN role")
-    })
     @PutMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update user role", description = "Updates the role of a specific user. Requires ADMIN role.")
     public ResponseEntity<UserDTO> updateUserRole(
             @PathVariable Long id,
             @RequestParam Role role,
@@ -50,14 +39,19 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUserRole(id, role, currentUser));
     }
 
-    @Operation(summary = "Delete user", description = "Deletes a user account by ID. Restricted to ADMIN role.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "User deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Requires ADMIN role")
-    })
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update user status", description = "Activates or deactivates a user account. Requires ADMIN role.")
+    public ResponseEntity<UserDTO> updateUserStatus(
+            @PathVariable Long id,
+            @RequestParam boolean active,
+            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(userService.updateUserStatus(id, active, currentUser));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete user", description = "Deletes a specific user account. Requires ADMIN role.")
     public ResponseEntity<Void> deleteUser(
             @PathVariable Long id,
             @AuthenticationPrincipal User currentUser) {

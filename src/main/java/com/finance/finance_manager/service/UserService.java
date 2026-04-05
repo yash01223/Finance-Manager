@@ -38,6 +38,19 @@ public class UserService {
     }
 
     @Transactional
+    public UserDTO updateUserStatus(Long id, boolean active, User currentUser) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You cannot activate/deactivate your own account.");
+        }
+
+        user.setActive(active);
+        return convertToDTO(userRepository.save(user));
+    }
+
+    @Transactional
     public void deleteUser(Long id, User currentUser) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));

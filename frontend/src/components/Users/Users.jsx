@@ -25,6 +25,15 @@ const Users = () => {
         fetchUsers();
     }, []);
 
+    const handleStatusToggle = async (userId, newStatus) => {
+        try {
+            await api.patch(`/users/${userId}/status?active=${newStatus}`);
+            fetchUsers();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to update status.');
+        }
+    };
+
     const handleRoleChange = async (userId, newRole) => {
         try {
             await api.put(`/users/${userId}/role?role=${newRole}`);
@@ -50,35 +59,35 @@ const Users = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-[#FDFDFD]">
+        <div className="flex min-h-screen bg-white">
             {/* Sidebar */}
-            <aside className="w-72 bg-white border-r border-gray-100 flex flex-col sticky top-0 h-screen">
+            <aside className="w-72 bg-dark border-r border-dark/5 flex flex-col sticky top-0 h-screen shadow-2xl shadow-dark/20">
                 <div className="p-8 pb-12">
                     <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => navigate('/dashboard')}>
-                        <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg shadow-black/10">
+                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white transition-transform group-hover:scale-110 shadow-lg shadow-primary/20">
                             <Wallet size={20} />
                         </div>
-                        <span className="text-xl font-black tracking-tighter uppercase">Finance.</span>
+                        <span className="text-xl font-black tracking-tighter uppercase text-cream">Finance.</span>
                     </div>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-1">
-                    <button onClick={() => navigate('/dashboard')} className="flex items-center space-x-3 w-full px-4 py-3 text-gray-400 hover:text-black hover:bg-gray-50 rounded-xl font-bold transition-all border border-transparent">
+                    <button onClick={() => navigate('/dashboard')} className="flex items-center space-x-3 w-full px-4 py-3 text-cream/40 hover:text-cream hover:bg-white/5 rounded-xl font-bold transition-all border border-transparent">
                         <LayoutDashboard size={20} />
                         <span className="text-sm">Dashboard</span>
                     </button>
-                    <button onClick={() => navigate('/records')} className="flex items-center space-x-3 w-full px-4 py-3 text-gray-400 hover:text-black hover:bg-gray-50 rounded-xl font-bold transition-all border border-transparent">
+                    <button onClick={() => navigate('/records')} className="flex items-center space-x-3 w-full px-4 py-3 text-cream/40 hover:text-cream hover:bg-white/5 rounded-xl font-bold transition-all border border-transparent">
                         <FileText size={20} />
                         <span className="text-sm">Records</span>
                     </button>
-                    <button className="flex items-center space-x-3 w-full px-4 py-3 bg-blue-50/50 text-blue-600 rounded-xl font-bold transition-all border border-blue-100/50">
+                    <button className="flex items-center space-x-3 w-full px-4 py-3 bg-primary/10 text-primary rounded-xl font-bold transition-all border border-primary/10">
                         <Shield size={20} />
                         <span className="text-sm">User Management</span>
                     </button>
                 </nav>
 
                 <div className="p-4 mt-auto">
-                    <button onClick={handleLogout} className="flex items-center space-x-3 w-full px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-bold transition-all border border-transparent">
+                    <button onClick={handleLogout} className="flex items-center space-x-3 w-full px-4 py-3 text-danger/80 hover:bg-danger/10 rounded-xl font-bold transition-all border border-transparent">
                         <LogOut size={20} />
                         <span className="text-sm">Sign Out</span>
                     </button>
@@ -86,40 +95,40 @@ const Users = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1">
-                <header className="glass-header px-12 py-6 flex justify-between items-center bg-white/70">
+            <main className="flex-1 bg-white">
+                <header className="glass-header px-12 py-6 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-black tracking-tight text-black uppercase">User Directory</h1>
-                        <p className="text-sm text-gray-400 font-medium">Manage access levels and monitor activity</p>
+                        <h1 className="text-3xl font-black tracking-tight text-dark uppercase">User Directory</h1>
+                        <p className="text-sm text-dark/40 font-medium">Manage access levels and monitor activity</p>
                     </div>
                 </header>
 
                 <div className="px-12 py-10">
-                    <div className="bg-white rounded-[2rem] border border-gray-100 shadow-2xl shadow-black/[0.03] overflow-hidden">
+                    <div className="bg-white rounded-[2rem] border border-dark/5 shadow-2xl shadow-dark/5 overflow-hidden">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-gray-50/50 border-b border-gray-100">
-                                    <th className="p-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Username</th>
-                                    <th className="p-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Current Role</th>
-                                    <th className="p-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Status</th>
-                                    <th className="p-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Actions</th>
+                                <tr className="bg-dark/5 border-b border-dark/5">
+                                    <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em]">Username</th>
+                                    <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em]">Current Role</th>
+                                    <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em] text-center">Status</th>
+                                    <th className="p-6 text-[10px] font-black text-dark/30 uppercase tracking-[0.2em] text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-dark/5">
                                 <AnimatePresence>
                                     {users.map((user) => (
                                         <motion.tr 
                                             key={user.id}
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
-                                            className="hover:bg-gray-50/50 transition-colors"
+                                            className="hover:bg-dark/5 transition-colors"
                                         >
                                             <td className="p-6">
                                                 <div className="flex items-center space-x-3">
-                                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                                    <div className="w-8 h-8 rounded-full bg-dark/5 flex items-center justify-center text-dark/30">
                                                         <UserIcon size={14} />
                                                     </div>
-                                                    <span className="font-bold text-black">{user.username} {user.username === currentUsername && "(You)"}</span>
+                                                    <span className="font-bold text-dark">{user.username} {user.username === currentUsername && "(You)"}</span>
                                                 </div>
                                             </td>
                                             <td className="p-6">
@@ -127,7 +136,7 @@ const Users = () => {
                                                     disabled={true}
                                                     value={user.role} 
                                                     onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                                                    className="bg-white border border-gray-100 p-2 rounded-lg font-bold text-xs uppercase tracking-wider outline-none cursor-not-allowed opacity-50"
+                                                    className="bg-dark/5 border border-dark/5 p-2 rounded-lg font-bold text-xs uppercase tracking-wider outline-none cursor-not-allowed opacity-40 text-dark"
                                                 >
                                                     <option value="VIEWER">Viewer</option>
                                                     <option value="ANALYST">Analyst</option>
@@ -135,18 +144,27 @@ const Users = () => {
                                                 </select>
                                             </td>
                                             <td className="p-6 text-center">
-                                                <div className="flex items-center justify-center space-x-2">
-                                                    <Circle size={8} fill={user.online ? "#10b981" : "#d1d5db"} className={user.online ? "text-green-500 animate-pulse" : "text-gray-300"} />
-                                                    <span className={`text-[10px] font-black uppercase tracking-widest ${user.online ? "text-green-600" : "text-gray-400"}`}>
-                                                        {user.online ? "Active" : "Inactive"}
-                                                    </span>
+                                                <div className="flex flex-col items-center justify-center space-y-2">
+                                                    <div className="flex items-center space-x-2">
+                                                        <Circle size={8} fill={user.online ? "#10B981" : "rgba(0,0,0,0.05)"} className={user.online ? "text-success animate-pulse" : "text-dark/10"} />
+                                                        <span className={`text-[9px] font-black uppercase tracking-widest ${user.online ? "text-success" : "text-dark/30"}`}>
+                                                            {user.online ? "Online" : "Offline"}
+                                                        </span>
+                                                    </div>
+                                                    <button 
+                                                        disabled={user.username === currentUsername}
+                                                        onClick={() => handleStatusToggle(user.id, !user.active)}
+                                                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${user.active ? 'bg-success/10 text-success hover:bg-danger/10 hover:text-danger' : 'bg-dark/5 text-dark/40 hover:bg-success hover:text-white'}`}
+                                                    >
+                                                        {user.active ? "Active" : "Inactive"}
+                                                    </button>
                                                 </div>
                                             </td>
                                             <td className="p-6 text-center">
                                                 <button 
                                                     disabled={user.username === currentUsername}
                                                     onClick={() => handleDelete(user.id)}
-                                                    className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center mx-auto hover:bg-red-600 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    className="w-8 h-8 rounded-lg bg-danger/10 text-danger flex items-center justify-center mx-auto hover:bg-danger hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>

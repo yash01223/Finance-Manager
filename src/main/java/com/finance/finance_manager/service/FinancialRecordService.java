@@ -28,7 +28,9 @@ public class FinancialRecordService {
     private final FinancialRecordRepository financialRecordRepository;
     private final UserRepository userRepository;
 
-    private static final List<String> FIXED_CATEGORIES = Arrays.asList("Salary", "Rent", "Travel", "Food", "other");
+    private static final List<String> FIXED_CATEGORIES = Arrays.asList(
+        "Salary", "Bonus", "Investment", "Rent", "Utilities", "Shopping", "Food", "Eating Out", "Health", "Education", "Transport", "Travel", "Other"
+    );
 
     @Transactional
     public FinancialRecord createRecord(FinancialRecordDTO dto, User user) {
@@ -62,7 +64,8 @@ public class FinancialRecordService {
     }
 
     public Page<FinancialRecord> getAllRecords(
-            User user, Long targetUserId, TransactionType type, String category, String notes,
+            User user, Long targetUserId, TransactionType type, String category,
+            java.time.LocalDate startDate, java.time.LocalDate endDate,
             Pageable pageable) {
 
         if (user.getRole() == Role.VIEWER) {
@@ -75,7 +78,25 @@ public class FinancialRecordService {
             userId = targetUserId;
         }
 
-        return financialRecordRepository.findByCriteria(userId, type, category, notes, pageable);
+        return financialRecordRepository.findByCriteria(userId, type, category, startDate, endDate, pageable);
+    }
+
+    public List<FinancialRecord> getRecentActivity(User user, Long targetUserId) {
+        Long userId = user.getId();
+        if (user.getRole() == Role.ADMIN || user.getRole() == Role.ANALYST || user.getRole() == Role.VIEWER) {
+            userId = targetUserId;
+        }
+        return financialRecordRepository.findTop10ByUser_IdOrderByDateDesc(userId);
+    }
+
+    public List<Map<String, Object>> getWeeklyTrends(User user, Long targetUserId) {
+        Long userId = user.getId();
+        if (user.getRole() == Role.ADMIN || user.getRole() == Role.ANALYST || user.getRole() == Role.VIEWER) {
+            userId = targetUserId;
+        }
+        // Last 8 weeks
+        java.time.LocalDate startDate = java.time.LocalDate.now().minusWeeks(8);
+        return financialRecordRepository.sumWeeklyTrendsByUserId(userId, startDate);
     }
 
     public FinancialRecord getRecordById(Long id, User user) {

@@ -1,48 +1,53 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0070f3;
-  --color-success: #10b981;
-  --color-danger: #ef4444;
+  --color-primary: #3B82F6;
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-dark: #111827;
+  --color-bg: #FFFFFF;
+  --color-cream: #F9FAFB;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 :root {
-  background-color: #ffffff;
-  color: #000000;
+  background-color: #FFFFFF;
+  color: #111827;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 @layer base {
   * {
-    @apply border-black/10;
+    @apply border-dark/5;
   }
 }
 
 @layer components {
   .card-shadow {
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px -10px rgba(0, 21, 20, 0.05);
   }
   
   .glass-header {
-    @apply sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b;
+    @apply sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-dark/5;
   }
   
   .input-field {
-    @apply w-full border border-black/10 p-3 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50;
+    @apply w-full border border-dark/5 p-4 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all bg-dark/[0.02] text-dark placeholder-dark/20 font-bold;
   }
 
   .btn-primary {
-    @apply bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-sm;
+    @apply bg-primary text-white font-black py-4 px-8 rounded-2xl hover:bg-primary/90 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 uppercase tracking-widest text-xs border border-primary/20;
   }
   
   .btn-outline {
-    @apply border border-black/10 font-semibold py-2 px-4 rounded-lg hover:bg-gray-50 active:scale-95 transition-all;
+    @apply border border-dark/10 font-bold py-2 px-4 rounded-xl hover:bg-dark/5 active:scale-95 transition-all text-dark/70;
   }
 }
